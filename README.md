@@ -1,6 +1,6 @@
 # PYSKL
 
-This Repo is a clone from PYSKL with slight modification.
+This Repo is a clone from PYSKL with slight modification, which focus only on the STGCN++ model.
 
 
 ## Installation
