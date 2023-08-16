@@ -6,10 +6,10 @@ model = dict(
         gcn_with_res=True,
         tcn_type='mstcn',
         graph_cfg=dict(layout='coco', mode='spatial')),
-    cls_head=dict(type='GCNHead', num_classes=10, in_channels=256))
+    cls_head=dict(type='GCNHead', num_classes=100, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/aist++/aist++3d_4s_bm_only.pkl'
+ann_file = 'data/aist++/aist++3d_1_section_choreo.pkl'
 train_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
@@ -53,11 +53,11 @@ optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005, nestero
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
-total_epochs = 20
+total_epochs = 50
 checkpoint_config = dict(interval=1)
 evaluation = dict(interval=1, metrics=['top_k_accuracy'])
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_4s_bm_only/j'
+work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_1_section_choreo/j'

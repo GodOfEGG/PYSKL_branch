@@ -13,7 +13,7 @@ ann_file = 'data/aist++/aist++3d_4s.pkl'
 train_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSample', clip_len=500),
+    dict(type='UniformSample', clip_len=200),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -22,7 +22,7 @@ train_pipeline = [
 val_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSample', clip_len=500, num_clips=1),
+    dict(type='UniformSample', clip_len=200, num_clips=1),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -53,11 +53,11 @@ optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005, nestero
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
-total_epochs = 30
+total_epochs = 50
 checkpoint_config = dict(interval=1)
 evaluation = dict(interval=1, metrics=['top_k_accuracy'])
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_4s/j500_2'
+work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_4s/j'
