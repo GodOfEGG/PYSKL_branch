@@ -13,7 +13,7 @@ ann_file = 'data/aist++/aist++3d_8s.pkl'
 train_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSample', clip_len=400),
+    dict(type='UniformSample', clip_len=500),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -22,7 +22,7 @@ train_pipeline = [
 val_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSample', clip_len=400, num_clips=1),
+    dict(type='UniformSample', clip_len=500, num_clips=1),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -31,7 +31,7 @@ val_pipeline = [
 test_pipeline = [
     dict(type='PreNormalize3D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSample', clip_len=400, num_clips=10),
+    dict(type='UniformSample', clip_len=500, num_clips=10),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -60,4 +60,4 @@ log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_8s/j2'
+work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_8s/j5'
