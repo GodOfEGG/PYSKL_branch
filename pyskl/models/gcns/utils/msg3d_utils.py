@@ -136,7 +136,7 @@ class MSTCN(nn.Module):
             branch_outs.append(out)
 
         out = torch.cat(branch_outs, dim=1)
-        out += res
+        out = out + res
         out = self.act(out)
         out = self.drop(out)
         return out
@@ -229,7 +229,7 @@ class ST_MSGCN(nn.Module):
         agg = torch.einsum('kvu,nctv->nkctu', A, x)
         agg = agg.reshape(N, self.num_scales * C, T, V)
         out = self.mlp(agg)
-        out += res
+        out = out +  res
         return self.act(out)
 
 
@@ -313,5 +313,5 @@ class MW_MSG3DBlock(nn.Module):
     def forward(self, x):
         out_sum = 0
         for gcn3d in self.gcn3d:
-            out_sum += gcn3d(x)
+            out_sum = out_sum + gcn3d(x)
         return out_sum
