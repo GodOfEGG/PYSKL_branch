@@ -487,23 +487,22 @@ class ContinuousSampleFrames:
     def __init__(self,
                  clip_len,
                  num_clips=1,
-                 p_interval=1,
+                 stride=1,
                  seed=255,
                  **deprecated_kwargs):
 
         self.clip_len = clip_len
         self.num_clips = num_clips
+        self.stride = stride
         self.seed = seed
-        self.p_interval = p_interval
-        if not isinstance(p_interval, tuple):
-            self.p_interval = (p_interval, p_interval)
+
         if len(deprecated_kwargs):
-            warning_r0('[UniformSampleFrames] The following args has been deprecated: ')
+            warning_r0('[ContinuousSampleFrames] The following args has been deprecated: ')
             for k, v in deprecated_kwargs.items():
                 warning_r0(f'Arg name: {k}; Arg value: {v}')
 
-    def _get_train_clips(self, num_frames, clip_len):
-        """Uniformly sample indices for training clips.
+    def _get_train_clips(self, num_frames, clip_len, stride):
+        """Continuously sample indices for training clips.
 
         Args:
             num_frames (int): The number of frames.
@@ -511,22 +510,17 @@ class ContinuousSampleFrames:
         """
         allinds = []
         for clip_idx in range(self.num_clips):
-            old_num_frames = num_frames
-            pi = self.p_interval
-            ratio = np.random.rand() * (pi[1] - pi[0]) + pi[0]
-            num_frames = int(ratio * num_frames)
-
-            
-            start = np.random.randint(0, num_frames)
-            inds = np.arange(start, start + clip_len)
-            
-            num_frames = old_num_frames
+            if num_frames > clip_len * stride:
+                start = np.random.randint(0, num_frames-clip_len*stride)
+            else:
+                start = np.random.randint(0, num_frames)
+            inds = np.arange(start, start + clip_len, stride)
 
             allinds.append(inds)
 
         return np.concatenate(allinds)
 
-    def _get_test_clips(self, num_frames, clip_len):
+    def _get_test_clips(self, num_frames, clip_len, stride):
         """Uniformly sample indices for testing clips.
 
         Args:
@@ -538,23 +532,16 @@ class ContinuousSampleFrames:
         all_inds = []
 
         for i in range(self.num_clips):
-
-            old_num_frames = num_frames
-            pi = self.p_interval
-            ratio = np.random.rand() * (pi[1] - pi[0]) + pi[0]
-            num_frames = int(ratio * num_frames)
-
-            if num_frames <= clip_len:
+            if num_frames <= clip_len*stride:
                 start = i if num_frames < self.num_clips else i * num_frames // self.num_clips
-                inds = np.arange(start, start + clip_len)
+                inds = np.arange(start, start + clip_len, stride)
             else:
-                seg = (num_frames-clip_len) // self.num_clips + 1
+                seg = (num_frames-clip_len*stride) // self.num_clips + 1
                 start = seg * i
                 off = np.random.randint(0, seg)
-                inds = np.arange(start+off, start+off+clip_len)
+                inds = np.arange(start+off, start+off+clip_len, stride)
 
             all_inds.append(inds)
-            num_frames = old_num_frames
 
         return np.concatenate(all_inds)
 
@@ -562,9 +549,9 @@ class ContinuousSampleFrames:
         num_frames = results['total_frames']
 
         if results.get('test_mode', False):
-            inds = self._get_test_clips(num_frames, self.clip_len)
+            inds = self._get_test_clips(num_frames, self.clip_len, self.stride)
         else:
-            inds = self._get_train_clips(num_frames, self.clip_len)
+            inds = self._get_train_clips(num_frames, self.clip_len, self.stride)
 
         inds = np.mod(inds, num_frames)
         start_index = results['start_index']

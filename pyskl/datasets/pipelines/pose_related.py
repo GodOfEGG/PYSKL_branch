@@ -299,7 +299,7 @@ class JointToBone:
     def __init__(self, dataset='nturgb+d', target='keypoint'):
         self.dataset = dataset
         self.target = target
-        if self.dataset not in ['nturgb+d', 'openpose', 'coco', 'handmp']:
+        if self.dataset not in ['nturgb+d', 'openpose', 'coco', 'handmp', 'smpl']:
             raise ValueError(
                 f'The dataset type {self.dataset} is not supported')
         if self.dataset == 'nturgb+d':
@@ -316,6 +316,10 @@ class JointToBone:
             self.pairs = ((0, 0), (1, 0), (2, 1), (3, 2), (4, 3), (5, 0), (6, 5), (7, 6), (8, 7), (9, 0), (10, 9),
                           (11, 10), (12, 11), (13, 0), (14, 13), (15, 14), (16, 15), (17, 0), (18, 17), (19, 18),
                           (20, 19))
+        elif self.dataset == 'smpl':
+            self.pairs = ((1, 0), (2, 0), (4, 1), (5, 2), (7, 4), (8, 5), (10, 7), (11, 8), (3, 0), (6, 3), (9, 6),
+                          (12, 9), (13, 9), (14, 9), (15, 12), (16, 13), (18, 16), (20, 18), (22, 20), (17, 14),
+                          (19, 17), (21, 19), (23, 21))
 
     def __call__(self, results):
 
@@ -326,7 +330,7 @@ class JointToBone:
         assert C in [2, 3]
         for v1, v2 in self.pairs:
             bone[..., v1, :] = keypoint[..., v1, :] - keypoint[..., v2, :]
-            if C == 3 and self.dataset in ['openpose', 'coco', 'handmp']:
+            if C == 3 and self.dataset in ['openpose', 'coco', 'handmp', 'smpl']:
                 score = (keypoint[..., v1, 2] + keypoint[..., v2, 2]) / 2
                 bone[..., v1, 2] = score
 
