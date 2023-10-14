@@ -5,15 +5,17 @@ model = dict(
         gcn_adaptive='init',
         gcn_with_res=True,
         tcn_type='mstcn',
-        graph_cfg=dict(layout='smpl', mode='spatial')),
+        graph_cfg=dict(layout='coco', mode='spatial')),
     cls_head=dict(type='GCNHead', num_classes=10, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/aist++/aist++_smpl_240.pkl'
+ann_file = 'data/aist++/aist++3d_1_section.pkl'
 train_pipeline = [
     dict(type='PreNormalize3D'),
-    dict(type='GenSkeFeat', dataset='smpl', feats=['j']),
-    dict(type='UniformSample', clip_len=240),
+    dict(type='RandomScale', scale=0.1),
+    dict(type='RandomRot'),
+    dict(type='GenSkeFeat', dataset='coco', feats=['j']),
+    dict(type='UniformSample', clip_len=100),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -21,8 +23,8 @@ train_pipeline = [
 ]
 val_pipeline = [
     dict(type='PreNormalize3D'),
-    dict(type='GenSkeFeat', dataset='smpl', feats=['j']),
-    dict(type='UniformSample', clip_len=240, num_clips=1),
+    dict(type='GenSkeFeat', dataset='coco', feats=['j']),
+    dict(type='UniformSample', clip_len=100, num_clips=1),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -30,8 +32,8 @@ val_pipeline = [
 ]
 test_pipeline = [
     dict(type='PreNormalize3D'),
-    dict(type='GenSkeFeat', dataset='smpl', feats=['j']),
-    dict(type='UniformSample', clip_len=240, num_clips=1),
+    dict(type='GenSkeFeat', dataset='coco', feats=['j']),
+    dict(type='UniformSample', clip_len=100, num_clips=10),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -49,10 +51,10 @@ data = dict(
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='test'))
 
 # optimizer
-optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0005, nesterov=True)
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005, nesterov=True)
 optimizer_config = dict(grad_clip=None)
 # learning policy
-lr_config = dict(policy='CosineAnnealing', min_lr=0.0001, by_epoch=False)
+lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
 total_epochs = 50
 checkpoint_config = dict(interval=1)
 evaluation = dict(interval=1, metrics=['top_k_accuracy'])
@@ -60,4 +62,4 @@ log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_aist++_smpl_240/j2'
+work_dir = './work_dirs/stgcn++/stgcn++_aist++3d_1_section/j_aug'
