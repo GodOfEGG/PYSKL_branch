@@ -40,7 +40,7 @@ data = dict(
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
-        times=20,
+        times=5,
         dataset=dict(type=dataset_type, ann_file=ann_file, pipeline=train_pipeline, split='train')),
     val=dict(type=dataset_type, ann_file=ann_file, pipeline=val_pipeline, split='val'),
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='test'))

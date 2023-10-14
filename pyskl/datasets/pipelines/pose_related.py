@@ -234,7 +234,7 @@ class PreNormalize3D:
                         [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
                         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
-    def __init__(self, zaxis=[0, 1], xaxis=[8, 4], align_spine=True, align_center=True):
+    def __init__(self, zaxis=[0, 6], xaxis=[17, 16], align_spine=True, align_center=True):
         self.zaxis = zaxis
         self.xaxis = xaxis
         self.align_spine = align_spine
@@ -268,6 +268,8 @@ class PreNormalize3D:
         if self.align_center:
             if skeleton.shape[2] == 25:
                 main_body_center = skeleton[0, 0, 1].copy()
+            elif skeleton.shape[2] == 24:
+                main_body_center = skeleton[0, 0, 3].copy()
             else:
                 main_body_center = skeleton[0, 0, -1].copy()
             mask = ((skeleton != 0).sum(-1) > 0)[..., None]
