@@ -54,10 +54,10 @@ optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0.0001, by_epoch=False)
 total_epochs = 50
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=10)
 evaluation = dict(interval=1, metrics=['top_k_accuracy'])
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_aist++_smpl_240/j2'
+work_dir = './work_dirs/stgcn++/stgcn++_aist++_smpl_240/j'

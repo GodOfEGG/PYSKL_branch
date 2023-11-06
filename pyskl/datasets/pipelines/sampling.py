@@ -598,6 +598,89 @@ class ContinuousSample(ContinuousSampleFrames):
 
 
 @PIPELINES.register_module()
+class ContinuousSampleDecode:
+
+    def __init__(self, clip_len, num_clips=1, stride=1, seed=255):
+        self.clip_len = clip_len
+        self.num_clips = num_clips
+        self.seed = seed
+        self.stride = stride
+
+    # will directly return the decoded clips
+    def _get_clips(self, full_kp, clip_len, stride):
+        M, T, V, C = full_kp.shape
+        clips = []
+        num_frames=T
+        for i in range(self.num_clips):
+            if num_frames <= clip_len*stride:
+                start = i if num_frames < self.num_clips else i * num_frames // self.num_clips
+                inds = np.arange(start, start + clip_len*stride, stride)%num_frames
+            else:
+                seg = (num_frames-clip_len*stride) // self.num_clips + 1
+                start = seg * i
+                off = np.random.randint(0, seg)
+                inds = np.arange(start+off, start+off+clip_len*stride, stride)%num_frames
+            clip = full_kp[:, inds].copy()
+            clips.append(clip)
+        return np.concatenate(clips, 1)
+
+    def _handle_dict(self, results):
+        assert 'keypoint' in results
+        kp = results.pop('keypoint')
+        if 'keypoint_score' in results:
+            kp_score = results.pop('keypoint_score')
+            kp = np.concatenate([kp, kp_score[..., None]], axis=-1)
+
+        kp = kp.astype(np.float32)
+        # start_index will not be used
+        kp = self._get_clips(kp, self.clip_len, self.stride)
+
+        results['clip_len'] = self.clip_len
+        results['frame_interval'] = None
+        results['num_clips'] = self.num_clips
+        results['keypoint'] = kp
+        return results
+
+    def _handle_list(self, results):
+        assert len(results) == self.num_clips
+        self.num_clips = 1
+        clips = []
+        for res in results:
+            assert 'keypoint' in res
+            kp = res.pop('keypoint')
+            if 'keypoint_score' in res:
+                kp_score = res.pop('keypoint_score')
+                kp = np.concatenate([kp, kp_score[..., None]], axis=-1)
+
+            kp = kp.astype(np.float32)
+            kp = self._get_clips(kp, self.clip_len, self.stride)
+            clips.append(kp)
+        ret = cp.deepcopy(results[0])
+        ret['clip_len'] = self.clip_len
+        ret['frame_interval'] = None
+        ret['num_clips'] = len(results)
+        ret['keypoint'] = np.concatenate(clips, 1)
+        self.num_clips = len(results)
+        return ret
+
+    def __call__(self, results):
+        test_mode = results.get('test_mode', False)
+        if test_mode is True:
+            np.random.seed(self.seed)
+        if isinstance(results, list):
+            return self._handle_list(results)
+        else:
+            return self._handle_dict(results)
+
+    def __repr__(self):
+        repr_str = (f'{self.__class__.__name__}('
+                    f'clip_len={self.clip_len}, '
+                    f'num_clips={self.num_clips}, '
+                    f'p_interval={self.p_interval}, '
+                    f'seed={self.seed})')
+        return repr_str
+
+@PIPELINES.register_module()
 class RandomSampleFrames:
     """Randomly sample frames from the video.
 
@@ -646,13 +729,12 @@ class RandomSampleFrames:
             else:
                 max_frames = num_frames * (clip_len//num_frames+1)
 
-            inds = np.random.choice(max_frames, clip_len, replace=False)
-            if self.in_order:
-                inds = np.sort(inds)      
+            
+            for i in range(clip_len):
+                off = int(max_frames/clip_len*i)
+                allinds.append(off+np.random.randint(max_frames//clip_len))
 
-            allinds.append(inds)
-
-        return np.concatenate(allinds)
+        return np.array(allinds)
 
     def _get_test_clips(self, num_frames, clip_len):
         """Uniformly sample indices for testing clips.
@@ -663,21 +745,7 @@ class RandomSampleFrames:
         """
         np.random.seed(self.seed)
 
-        all_inds = []
-
-        for i in range(self.num_clips):
-            if num_frames <= clip_len:
-                max_frames = num_frames * (clip_len//num_frames+1)
-            else:
-                max_frames = num_frames
-
-            inds = np.random.choice(num_frames, clip_len, replace=False)
-            if self.in_order:
-                inds = np.sort(inds)
-
-            all_inds.append(inds)
-
-        return np.concatenate(all_inds)
+        return self._get_train_clips(num_frames, clip_len)
 
     def __call__(self, results):
         num_frames = results['total_frames']
@@ -728,3 +796,85 @@ class RandomSampleFrames:
 @PIPELINES.register_module()
 class RandomSample(RandomSampleFrames):
     pass
+
+@PIPELINES.register_module()
+class RandomSampleDecode:
+
+    def __init__(self, clip_len, num_clips=1, seed=255):
+        self.clip_len = clip_len
+        self.num_clips = num_clips
+        self.seed = seed
+
+    # will directly return the decoded clips
+    def _get_clips(self, full_kp, clip_len):
+        M, T, V, C = full_kp.shape
+        clips = []
+        num_frames=T
+        for i in range(self.num_clips):
+            if num_frames > clip_len:
+                max_frames = num_frames
+            else:
+                max_frames = num_frames * (clip_len//num_frames+1)
+
+            inds=[]
+            for i in range(clip_len):
+                off = int(max_frames/clip_len*i)
+                inds.append(off+np.random.randint(max_frames//clip_len))
+            clip = full_kp[:, inds].copy()
+            clips.append(clip)
+        return np.concatenate(clips, 1)
+
+    def _handle_dict(self, results):
+        assert 'keypoint' in results
+        kp = results.pop('keypoint')
+        if 'keypoint_score' in results:
+            kp_score = results.pop('keypoint_score')
+            kp = np.concatenate([kp, kp_score[..., None]], axis=-1)
+
+        kp = kp.astype(np.float32)
+        # start_index will not be used
+        kp = self._get_clips(kp, self.clip_len)
+
+        results['clip_len'] = self.clip_len
+        results['frame_interval'] = None
+        results['num_clips'] = self.num_clips
+        results['keypoint'] = kp
+        return results
+
+    def _handle_list(self, results):
+        assert len(results) == self.num_clips
+        self.num_clips = 1
+        clips = []
+        for res in results:
+            assert 'keypoint' in res
+            kp = res.pop('keypoint')
+            if 'keypoint_score' in res:
+                kp_score = res.pop('keypoint_score')
+                kp = np.concatenate([kp, kp_score[..., None]], axis=-1)
+
+            kp = kp.astype(np.float32)
+            kp = self._get_clips(kp, self.clip_len)
+            clips.append(kp)
+        ret = cp.deepcopy(results[0])
+        ret['clip_len'] = self.clip_len
+        ret['frame_interval'] = None
+        ret['num_clips'] = len(results)
+        ret['keypoint'] = np.concatenate(clips, 1)
+        self.num_clips = len(results)
+        return ret
+
+    def __call__(self, results):
+        test_mode = results.get('test_mode', False)
+        if test_mode is True:
+            np.random.seed(self.seed)
+        if isinstance(results, list):
+            return self._handle_list(results)
+        else:
+            return self._handle_dict(results)
+
+    def __repr__(self):
+        repr_str = (f'{self.__class__.__name__}('
+                    f'clip_len={self.clip_len}, '
+                    f'num_clips={self.num_clips}, '
+                    f'seed={self.seed})')
+        return repr_str
