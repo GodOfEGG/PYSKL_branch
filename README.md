@@ -1,6 +1,8 @@
 # PYSKL on AIST++ Dataset
 
-This Repo is cloned from PYSKL with some modification.
+This Repo is a copy of [PYSKL](https://github.com/kennymckormick/pyskl/tree/main) with the modification below:
+
+1.
 
 
 ## Installation
@@ -13,19 +15,18 @@ conda activate pyskl
 pip install -e .
 ```
 
-## Demo
-
-Check [demo.md](/demo/demo.md).
 
 ## Data Preparation
 
-We provide HRNet 2D skeletons for every dataset we supported and Kinect 3D skeletons for the NTURGB+D and NTURGB+D 120 dataset. To obtain the human skeleton annotations, you can:
-
-1. Use our pre-processed skeleton annotations: we directly provide the processed skeleton data for all datasets as pickle files (which can be directly used for training and testing), check [Data Doc](/tools/data/README.md) for the download links and descriptions of the annotation format.
-2. For NTURGB+D 3D skeletons, you can download the official annotations from https://github.com/shahroudy/NTURGB-D, and use our [provided script](/tools/data/ntu_preproc.py) to generate the processed pickle files. The generated files are the same with the provided `ntu60_3danno.pkl` and `ntu120_3danno.pkl`. For detailed instructions, follow the [Data Doc](/tools/data/README.md).
-3. We also provide scripts to extract 2D HRNet skeletons from RGB videos, you can follow the [diving48_example](/examples/extract_diving48_skeleton/diving48_example.ipynb) to extract 2D skeletons from an arbitrary RGB video dataset.
-
-You can use [vis_skeleton](/demo/vis_skeleton.ipynb) to visualize the provided skeleton data.
+1. Download the annotations from [AIST++ website](https://google.github.io/aistplusplus_dataset/factsfigures.html).
+2. Use the following commands to segment the data by bar or by time. Use the INI files to parse the arguments. Some example config files are 
+in the ./configs/segmentation
+```shell
+# segment by bars
+python data_segmentation/AIST2PYSKL_segment_by_bar.py configs/segmentation/{config_name}
+# segment by time
+python data_segmentation/AIST2PYSKL_segment_by_time.py configs/segmentation/{config_name}
+```
 
 ## Training & Testing
 
