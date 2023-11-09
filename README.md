@@ -21,8 +21,8 @@ pip install -e .
 ## Data Preparation
 
 1. Download the annotations from [AIST++ website](https://google.github.io/aistplusplus_dataset/factsfigures.html).
-2. Use the following commands to segment the data by bar or by time. Use the INI files to parse the arguments. Some example config files are 
-in the ./configs/segmentation
+2. Use the following commands to segment the data by bar or by time. The configuration files are in INI format. Some example configuration files are 
+in ./configs/segmentation
 ```shell
 # segment by bars
 python data_segmentation/AIST2PYSKL_segment_by_bar.py configs/segmentation/{config_name}
