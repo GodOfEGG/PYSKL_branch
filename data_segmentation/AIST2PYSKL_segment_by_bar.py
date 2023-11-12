@@ -59,9 +59,9 @@ def main(args):
             continue
 
         num_segment = None
-        if 'sBM' in id:
+        if 'sBM' in pkl_filepath.stem:
             num_segment = BM_TOTAL_BARS // args.num_bars
-        elif 'sFM' in id:
+        elif 'sFM' in pkl_filepath.stem:
             num_segment = FM_TOTAL_BARS // args.num_bars
 
         with open(pkl_filepath, 'rb') as pkl_f:
@@ -84,8 +84,8 @@ def main(args):
 
 
             for i in range(num_segment):
-                st_frame = keypoints.shape[0] * (i/num_segment)
-                end_frame = keypoints.shape[0] * ((i+1)/num_segment)
+                st_frame = int(keypoints.shape[0] * (i/num_segment))
+                end_frame = int(keypoints.shape[0] * ((i+1)/num_segment))
                 anno_dict = {}
                 anno_dict['keypoint'] = np.expand_dims(keypoints[st_frame:end_frame], axis=0)
                 anno_dict['frame_dir'] = pkl_filepath.stem + f'_{i+1:02d}'
