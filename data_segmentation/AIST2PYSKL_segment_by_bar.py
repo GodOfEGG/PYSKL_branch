@@ -137,10 +137,10 @@ def main(args):
         new_test_list = []
         for id in org_test_list:
             num_segment = None
-        if 'sBM' in id:
-            num_segment = BM_TOTAL_BARS // args.num_bars
-        elif 'sFM' in id:
-            num_segment = FM_TOTAL_BARS // args.num_bars
+            if 'sBM' in id:
+                num_segment = BM_TOTAL_BARS // args.num_bars
+            elif 'sFM' in id:
+                num_segment = FM_TOTAL_BARS // args.num_bars
 
             for i in range(num_segment):
                 new_test_list.append(id + f'_{i+1:02d}')
