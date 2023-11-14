@@ -45,13 +45,7 @@ For specific examples, please go to the README for each specific algorithm we su
 
 
 ```BibTeX
-@inproceedings{duan2022pyskl,
-  title={Pyskl: Towards good practices for skeleton action recognition},
-  author={Duan, Haodong and Wang, Jiaqi and Chen, Kai and Lin, Dahua},
-  booktitle={Proceedings of the 30th ACM International Conference on Multimedia},
-  pages={7351--7354},
-  year={2022}
-}
+
 ```
 
 
