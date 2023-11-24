@@ -4,7 +4,7 @@ This Repo is a copy of [PYSKL](https://github.com/kennymckormick/pyskl/tree/main
 
 1. In pyskl/datasets/pipelines/pose_related.py, we add SMPL format to class JointToBone.
 2. In pyskl/utils/graph.py, we add SMPL format to class Graph.
-3. In pyskl/datasets/pipelines/sampling.py, we add the class [ContinuousSampleFrames, ContinuousSamplem ContinuousSampleDecode] and [RandomSampleFrames, RandomSample, RandomSampleDecode].
+3. In pyskl/datasets/pipelines/sampling.py, we add the class [ContinuousSampleFrames, ContinuousSample, ContinuousSampleDecode] and [RandomSampleFrames, RandomSample, RandomSampleDecode].
 
 
 ## Installation
