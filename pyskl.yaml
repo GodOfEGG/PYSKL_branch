@@ -1,4 +1,4 @@
-name: pyskl2
+name: pyskl
 channels:
   - pytorch
   - conda-forge
